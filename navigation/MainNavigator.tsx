@@ -18,7 +18,6 @@ export default function MainNavigator() {
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
             height: 70,
-            paddingBottom: 10,
             paddingTop: 10,
             borderTopWidth: 0,
           },
@@ -40,6 +39,8 @@ export default function MainNavigator() {
           name="Profile"
           component={Profile}
           options={{
+            headerShown: true,
+            headerTitle: 'Perfil',
             tabBarIcon: ({ color, size }: { color: string; size: number }) => (
               <Feather name="user" size={size} color={color} />
             ),
