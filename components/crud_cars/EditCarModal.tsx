@@ -13,8 +13,8 @@ import {
 } from 'react-native';
 import { X, Camera, ImagePlus } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { EditCarRequest } from 'api/cars';
-import AuthenticatedImage from '../AuthenticatedImage'; // Import the new component
+import { EditCarRequest, carsApi } from 'api/cars';
+import AuthenticatedImage from '../AuthenticatedImage';
 
 export interface CarData {
   id: string;
@@ -106,7 +106,7 @@ export function EditCarModal({ visible, car, onClose, onSubmit }: EditCarModalPr
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.name || !formData.plate) {
       Alert.alert('Atenção', 'Preencha os dados principais.');
       return;
@@ -122,15 +122,20 @@ export function EditCarModal({ visible, car, onClose, onSubmit }: EditCarModalPr
       available: car?.available ?? true,
     };
 
-    // Only add the 'file' property if a new image has been selected.
     if (newImageUri) {
       payload.file = newImageUri;
+    } else if (originalImage) {
+      try {
+        const base64Image = await carsApi.getImage(originalImage);
+        payload.file = base64Image;
+      } catch (error) {
+        console.error('Erro ao buscar imagem original:', error);
+      }
     }
 
     onSubmit(payload);
   };
 
-  // The image to display is either the new local one or the original from the server
   const imageToDisplay = newImageUri || originalImage;
 
   return (

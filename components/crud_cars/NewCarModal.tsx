@@ -159,7 +159,7 @@ export function NewCarModal({ visible, onClose, onSubmit }: CreateCarModalProps)
 
               <View className="flex-row justify-between mb-6">
                 <TextInput
-                  placeholder="Preço/h"
+                  placeholder="Preço/dia"
                   placeholderTextColor="#a1a1aa"
                   keyboardType="numeric"
                   className="text-white font-bold text-lg flex-1"

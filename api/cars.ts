@@ -38,6 +38,19 @@ export interface EditCarRequest extends Partial<Omit<CreateCarRequest, 'file'>> 
  * @returns An object containing the uri, name, and type for the file.
  */
 const createFileData = (fileUri: string) => {
+  if (fileUri.startsWith('data:')) {
+    const match = fileUri.match(/^data:([^;]+);base64,/);
+    const type = match ? match[1] : 'image/jpeg';
+    const base64Data = fileUri.split(',')[1];
+    const filename = 'image.jpg';
+    
+    return {
+      uri: fileUri,
+      name: filename,
+      type,
+    };
+  }
+  
   const filename = fileUri.split('/').pop() || 'image.jpg';
   const match = /\.(\w+)$/.exec(filename);
   const type = match ? `image/${match[1]}` : 'image/jpeg';
@@ -78,6 +91,29 @@ export const carsApi = {
     return response.json();
   },
 
+  getImage: async (imagePath: string): Promise<string> => {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}${API_ENDPOINTS.carImage}?image=${encodeURIComponent(imagePath)}`, {
+      method: 'GET',
+      headers,
+    });
+
+    if (!response.ok) {
+      throw new Error('Erro ao buscar imagem');
+    }
+
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64data = reader.result as string;
+        resolve(base64data);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  },
+
   create: async (data: CreateCarRequest): Promise<Car> => {
     const headers = await getAuthHeaders();
     delete (headers as any)['Content-Type'];
@@ -113,7 +149,6 @@ export const carsApi = {
 
     const formData = new FormData();
 
-    // Append all fields from the data object to formData, handling the file separately
     for (const key in data) {
       if (Object.prototype.hasOwnProperty.call(data, key)) {
         const value = data[key as keyof EditCarRequest];
