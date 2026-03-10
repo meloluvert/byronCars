@@ -11,6 +11,7 @@ const API_ENDPOINTS = {
   car: '/v1/car',
   cars: '/v1/cars',
   carFind: '/v1/cars/find',
+  carImage: '/v1/car/image',
   carEdit: '/v1/car/edit',
   carRemove: '/v1/car/remove',
 };

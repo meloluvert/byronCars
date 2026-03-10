@@ -53,7 +53,14 @@ export const authApi = {
     }
 
     const authData = await response.json();
-    await setToken(authData.token);
+    console.log('Auth data received from API:', authData);
+
+    if (authData && authData.token && typeof authData.token === 'string') {
+      await setToken(authData.token);
+    } else {
+      throw new Error('Token inválido ou não recebido da API');
+    }
+
     return authData;
   },
 
@@ -78,7 +85,7 @@ export const authApi = {
       headers,
       body: JSON.stringify(data),
     });
-
+console.log(JSON.stringify(data))
     if (!response.ok) {
       throw new Error('Erro ao atualizar usuário');
     }
