@@ -1,19 +1,50 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '../../contexts/AuthContext';
 
 import Google from "../../assets/logos/google.svg"
 import Facebook from "../../assets/logos/facebook.svg"
 
 export default function Register() {
-  const navigator = useNavigation()
+  const navigator = useNavigation();
+  const { signUp } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleRegister = async () => {
+    if (!name || !email || !password || !confirmPassword) {
+      Alert.alert('Erro', 'Por favor, preencha todos os campos');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Erro', 'As senhas não coincidem');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await signUp({ name, email, password });
+      Alert.alert('Sucesso', 'Conta criada com sucesso! Faça login.');
+      navigator.navigate('Login' as never);
+    } catch (error: any) {
+      Alert.alert('Erro', error.message || 'Falha ao criar conta');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-black">
@@ -91,31 +122,22 @@ export default function Register() {
               </View>
             </View>
 
-            <TouchableOpacity className="bg-primary mt-8 rounded-lg py-4 shadow-lg">
-              <Text className="text-white font-bold text-center text-lg" style={{
-                textShadowOffset: { width: 1, height: 1 },
-                textShadowColor: 'black',
-                textShadowRadius: 1
-              }}>Cadastrar</Text>
+            <TouchableOpacity 
+              className="bg-primary mt-8 rounded-lg py-4 shadow-lg"
+              onPress={handleRegister}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Text className="text-white font-bold text-center text-lg" style={{
+                  textShadowOffset: { width: 1, height: 1 },
+                  textShadowColor: 'black',
+                  textShadowRadius: 1
+                }}>Cadastrar</Text>
+              )}
             </TouchableOpacity>
-
-            <View className="flex-row items-center my-8">
-              <View className="flex-1 h-px bg-gray-700" />
-              <Text className="text-gray-400 mx-4">ou</Text>
-              <View className="flex-1 h-px bg-gray-700" />
-            </View>
-
-            <View className="flex-row gap-3">
-              <TouchableOpacity className="bg-[#151515] gap-2 rounded-lg py-3 flex-1 flex-row justify-center items-center shadow-lg">
-                <Google width={20} height={20} />
-                <Text className="text-white font-medium">Google</Text>
-              </TouchableOpacity>
-              <TouchableOpacity className="bg-[#151515] gap-2 rounded-lg py-3 flex-1 flex-row justify-center items-center shadow-lg">
-                <Facebook width={20} height={20} />
-                <Text className="text-white font-medium">Facebook</Text>
-              </TouchableOpacity>
-            </View>
-
+            
             <View className="flex-row justify-center mt-8">
               <Text className="text-gray-400">Já tem uma conta? </Text>
               <TouchableOpacity>
@@ -128,3 +150,4 @@ export default function Register() {
     </SafeAreaView>
   );
 }
+
